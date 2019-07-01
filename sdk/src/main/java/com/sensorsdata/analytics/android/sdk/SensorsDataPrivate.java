@@ -26,20 +26,45 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 /*public*/ class SensorsDataPrivate {
+    private static List<String> mIgnoredActivities;
     private static final SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"
             + ".SSS", Locale.CHINA);
     private static SensorsDatabaseHelper mDatabaseHelper;
     private static CountDownTimer countDownTimer;
     private static WeakReference<Activity> mCurrentActivity;
     private final static int SESSION_INTERVAL_TIME = 30 * 1000;
+
+    static {
+        mIgnoredActivities = new ArrayList<>();
+    }
+
+    public static void ignoreAutoTrackActivity(Class<?> activity) {
+        if (activity == null) {
+            return;
+        }
+
+        mIgnoredActivities.add(activity.getCanonicalName());
+    }
+
+    public static void removeIgnoredActivity(Class<?> activity) {
+        if (activity == null) {
+            return;
+        }
+
+        if (mIgnoredActivities.contains(activity.getCanonicalName())) {
+            mIgnoredActivities.remove(activity.getCanonicalName());
+        }
+    }
 
     public static void mergeJSONObject(final JSONObject source, JSONObject dest)
             throws JSONException {
@@ -130,6 +155,9 @@ import java.util.Map;
     private static void trackAppViewScreen(Activity activity) {
         try {
             if (activity == null) {
+                return;
+            }
+            if (mIgnoredActivities.contains(activity.getClass().getCanonicalName())) {
                 return;
             }
             JSONObject properties = new JSONObject();
