@@ -222,7 +222,9 @@ import java.util.Map;
 
             @Override
             public void onFinish() {
-                trackAppEnd(mCurrentActivity.get());
+                if (mCurrentActivity != null) {
+                    trackAppEnd(mCurrentActivity.get());
+                }
             }
         };
 
